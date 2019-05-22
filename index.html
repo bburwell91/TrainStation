@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <title>Train Station</title>
+
+  <!-- jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- Javascript -->
+  <script type="text/javascript" src="assets/javascript/app.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
+  <!-- Bootstrap CDN-->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+  <!-- Moments js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Asap|Merriweather+Sans|Nunito+Sans|Rubik" rel="stylesheet">
+
+</head>
+
+<body>
+<!-- Header ---------------------------------->
+<div class="jumbotron jumbotron-fluid" style="background-color: rgb(82, 70, 187); color: white">
+  <div class="container">
+      <h1 class="display-4 text-center">Train Scheduler</h1>
+      <p class="lead text-center">A resource to find your next train arrival</p>
+  </div>
+</div>
+<!-------------------------------------------->
+<!-- Train Schedule display ------------------>
+  <div class="card" style="margin-bottom: 40px">
+    <div class="card-header">
+        Current Train Schedule
+    </div>
+    <div class="card-body">
+    <table class="table">
+    <thead>
+        <tr>
+        <th scope="col">Train Name</th>
+        <th scope="col">Destination</th>
+        <th scope="col">Frequency (mins)</th>
+        <th scope="col">Next Arrival</th>
+        <th scope="col">Minutes Away</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+    </table>
+    </div>
+</div>
+<!------------------------------------------->
+<!-- Train station input form --------------->
+<div class="card">
+  <div class="card-header">
+      Add Train
+  </div>
+  <div class="card-body">
+  <form>
+    <div class="form-group">
+        <label for="train-name">Train Name</label>
+        <input type="name" class="form-control" id="inputName" aria-describedby="nameHelp" placeholder="">
+    </div>
+    <div class="form-group">
+        <label for="train-dest">Destination</label>
+        <input type="text" class="form-control" id="inputDestination" placeholder="">
+    </div>
+    <div class="form-group">
+        <label for="train-time">First Train Time (HH:mm - military time)</label>
+        <input type="time" class="form-control" id="inputArrival" placeholder="">
+    </div>
+    <div class="form-group">
+        <label for="train-freq">Frequency (mins)</label>
+        <input type="number" class="form-control" id="inputFrequency" placeholder="">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  </div>
+</div>
+<!----------------------------------------->
+<!----------------------------------------->
+<script>
+// Your web app's Firebase configuration
+var firebaseConfig = {
+  apiKey: "AIzaSyCSlvVhz91V9ZGFdjw51iDLUqMoD2zceLA",
+  authDomain: "trainschedule-e976a.firebaseapp.com",
+  databaseURL: "https://trainschedule-e976a.firebaseio.com",
+  projectId: "trainschedule-e976a",
+  storageBucket: "trainschedule-e976a.appspot.com",
+  messagingSenderId: "869278804424",
+  appId: "1:869278804424:web:5205da749afcc21d"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Create a variable to reference the database.
+var database = firebase.database();
+
+// Global variables
+var trainName = "";
+var destination = "";
+var trainFreq = "";
+var firstTime = "";
+
+// Capture submit button "click" to add train
+$("button").on("click", function(event) {
+  event.preventDefault();
+
+  // Puts the value in the input fields into the global variables
+  trainName = $("#inputName").val().trim();
+  destination = $("#inputDestination").val().trim();
+  trainFreq = $("#inputFrequency").val().trim();
+  firstTime = $("#inputArrival").val().trim();
+
+  $("#inputName").val() = "";
+  $("#inputDestination").val() = "";
+  $("#inputFrequency").val() = "";
+  $("#inputArrival").val() = "";
+
+  // Code for "Setting values in the database"
+  database.ref().push({
+    trainName: trainName,
+    destination: destination,
+    trainFreq: trainFreq,
+    firstTime: firstTime,
+  });
+});
+
+  // Firebase watcher + initial loader HINT: .on("value")
+  database.ref().on("child_added", function(childSnapshot) {
+
+// Log everything that's coming out of snapshot
+// console.log(childSnapshot.val());
+// console.log(childSnapshot.val().trainName);
+// console.log(childSnapshot.val().destination);
+// console.log(childSnapshot.val().trainFreq);
+// console.log(childSnapshot.val().firstTime);
+
+trainName = childSnapshot.val().trainName;
+destination = childSnapshot.val().destination;
+firstTime = childSnapshot.val().firstTime;
+trainFreq = childSnapshot.val().trainFreq;
+
+var firstTimeMoment = moment(firstTime, "HH:mm");
+console.log(firstTimeMoment);
+var currentTime = moment();
+console.log(currentTime);
+var minuteArrival = currentTime.diff(firstTimeMoment, 'minutes');
+console.log(minuteArrival);
+var minuteLast = minuteArrival % trainFreq;
+console.log(minuteLast);
+var awayTrain = trainFreq - minuteLast;
+console.log(awayTrain);
+var nextArrival = currentTime.add(awayTrain, 'minutes');
+console.log(nextArrival);
+var arrivalTime = nextArrival.format("HH:mm");
+console.log(arrivalTime);
+
+// Variables to create a new row and division in the table for a new train
+var newRow = $("<tr>");
+var nameDiv = $("<td class='name'>");
+var destinDiv = $("<td class='destination'>");
+var freqDiv = $("<td class='frequency'>");
+var arrDiv = $("<td class='arrival'>");
+var awayDiv = $("<td class='minutes-away'>");
+
+nameDiv.text(childSnapshot.val().trainName);
+destinDiv.text(childSnapshot.val().destination);
+freqDiv.text(childSnapshot.val().trainFreq);
+arrDiv.text(arrivalTime);
+awayDiv.text(awayTrain);
+
+newRow.prepend(nameDiv);
+newRow.append(destinDiv);
+newRow.append(freqDiv);
+newRow.append(arrDiv);
+newRow.append(awayDiv);
+
+$("tbody").append(newRow);
+
+// Handle the errors
+}, function(errorObject) {
+console.log("Errors handled: " + errorObject.code);
+});
+
+</script>
+
+</body>
+
+</html>
