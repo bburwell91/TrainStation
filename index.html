@@ -32,7 +32,7 @@
 </div>
 <!-------------------------------------------->
 <!-- Train Schedule display ------------------>
-  <div class="card" style="margin-bottom: 40px">
+  <div class="card card-right" style="margin-bottom: 40px">
     <div class="card-header">
         Current Train Schedule
     </div>
@@ -55,7 +55,7 @@
 </div>
 <!------------------------------------------->
 <!-- Train station input form --------------->
-<div class="card">
+<div class="card card-left">
   <div class="card-header">
       Add Train
   </div>
@@ -77,7 +77,7 @@
         <label for="train-freq">Frequency (mins)</label>
         <input type="number" class="form-control" id="inputFrequency" placeholder="">
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" id="submit-btn" class="btn btn-primary">Submit</button>
   </form>
   </div>
 </div>
@@ -107,7 +107,7 @@ var trainFreq = "";
 var firstTime = "";
 
 // Capture submit button "click" to add train
-$("button").on("click", function(event) {
+$("#submit-btn").on("click", function(event) {
   event.preventDefault();
 
   // Puts the value in the input fields into the global variables
@@ -116,10 +116,10 @@ $("button").on("click", function(event) {
   trainFreq = $("#inputFrequency").val().trim();
   firstTime = $("#inputArrival").val().trim();
 
-  $("#inputName").val() = "";
-  $("#inputDestination").val() = "";
-  $("#inputFrequency").val() = "";
-  $("#inputArrival").val() = "";
+  $("#inputName").val('');
+  $("#inputDestination").val('');
+  $("#inputFrequency").val('');
+  $("#inputArrival").val('');
 
   // Code for "Setting values in the database"
   database.ref().push({
